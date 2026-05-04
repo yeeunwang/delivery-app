@@ -52,11 +52,14 @@ with st.sidebar:
     st.header("⚙️ 주문 설정")
     selected_store = st.selectbox("🏬 가게 선택", list(store_menu_data.keys()))
     current_menus = store_menu_data[selected_store]
-    
-    budget = comma_input("나의 총 예산 (원)", "30000")
-    min_order = comma_input("가게 최소주문금액 (원)", "16000")
-    coupon = comma_input("쿠폰 할인액 (원)", "0")
+   
+    st.write(f"예산: {budget:,} 원")
+    min_order = st.number_input("가게 최소주문금액 (원)", value=16000, step=1000)
+    st.write(f"최소주문금액: {min_order:,} 원")
     main_item = st.selectbox("꼭 먹고 싶은 메뉴", list(current_menus.keys()))
+    coupon = st.number_input("쿠폰 할인액 (원)", value=0, step=1000)
+    st.write(f"쿠폰: {coupon:,} 원")
+
 
 # 버튼만 바로 실행
 if st.button("🚀 최적의 조합 계산하기"):
