@@ -1,7 +1,7 @@
 import streamlit as st
 import itertools
 
-# 1. 가게별 중첩 메뉴 데이터 구축
+# 1. 가게별 메뉴 데이터 구축
 store_menu_data = {
     "한솥도시락": {"치킨마요": 3800, "빅치킨마요": 4400, "돈까스도련님": 4900, "제육볶음": 4700, "진달래도시락": 8000},
     "신전떡볶이": {"떡볶이(1인분)": 3500, "로제떡볶이": 5500, "치즈김밥": 4000, "튀김오뎅(5개)": 1700, "잡채말이(3개)": 1700},
@@ -11,7 +11,8 @@ store_menu_data = {
     "청년피자": {"에그콘피자(L)": 24900, "매드쉬림프(L)": 24900, "진짜감자피자(L)": 18900, "할라불고기(L)": 18900, "알리오올리오파스타": 7900},
     "메가커피": {"아이스아메리카노": 2000, "딸기라떼": 3700, "큐브라떼": 4200, "허니자몽블랙티": 3700, "감자빵": 3500},
     "설빙": {"인절미설빙": 9500, "애플망고치즈설빙": 13900, "초코브라우니설빙": 12900, "생딸기설빙": 15500, "인절미토스트": 4800},
-    "미쉐": {"소프트아이스크림": 1000, "레몬에이드": 1500, "망고선데이": 2500, "브라운슈가펄밀크티": 3500, "복숭아얼그레이": 2500}}
+    "미쉐": {"소프트아이스크림": 1000, "레몬에이드": 1500, "망고선데이": 2500, "브라운슈가펄밀크티": 3500, "복숭아얼그레이": 2500}
+}
 
 # 배달비 산정 기준
 delivery_rules = [(50000, 0), (35000, 1000), (18000, 3000), (0, 4000)]
@@ -40,18 +41,20 @@ with st.sidebar:
     selected_store = st.selectbox("🏬 가게 선택", list(store_menu_data.keys()))
     current_menus = store_menu_data[selected_store]
     
-    # step=1000 유지
-    budget = st.number_input("나의 총 예산 (원)", value=30000, step=1000)
-    min_order = st.number_input("가게 최소주문금액 (원)", value=16000, step=1000)
-    coupon = st.number_input("쿠폰 할인액 (원)", value=0, step=1000)
+    # 수정된 입력 부분: step=1000으로 증감 조절, format="%d"로 콤마 가독성 확보
+    budget = st.number_input("나의 총 예산 (원)", min_value=0, value=30000, step=1000, format="%d")
+    min_order = st.number_input("가게 최소주문금액 (원)", min_value=0, value=16000, step=1000, format="%d")
+    coupon = st.number_input("쿠폰 할인액 (원)", min_value=0, value=0, step=1000, format="%d")
+    
     main_item = st.selectbox("꼭 먹고 싶은 메뉴", list(current_menus.keys()))
 
-# 버튼만 바로 실행
+# 실행 버튼
 if st.button("🚀 최적의 조합 계산하기"):
     items = list(current_menus.keys())
     best_cost = float('inf')
     best_result = None
 
+    # 메뉴 조합 탐색 (1개~4개 조합)
     for i in range(1, 5): 
         for combo in itertools.combinations(items, i):
             if main_item not in combo: 
@@ -59,6 +62,7 @@ if st.button("🚀 최적의 조합 계산하기"):
 
             total, food, d_fee = calculate_total_cost(current_menus, combo, coupon)
 
+            # 조건 확인: 최소주문금액 이상이고 총 결제액이 예산 이내인 경우
             if food >= min_order and total <= budget:
                 if total < best_cost:
                     best_cost = total
@@ -77,10 +81,10 @@ if st.button("🚀 최적의 조합 계산하기"):
         with res_col1:
             st.write("**[추천 메뉴 구성]**")
             for m in best_result['조합']:
-                st.write(f"- {m} ({current_menus[m]:,}원)")  # 출력시 콤마
+                st.write(f"- {m} ({current_menus[m]:,}원)")
         with res_col2:
-            st.metric("최종 결제 금액", f"{best_result['최종액']:,}원")  # 출력시 콤마
-            st.caption(f"음식 {best_result['음식값']:,}원 + 배달비 {best_result['배달비']:,}원 - 쿠폰 {coupon:,}원")  # 출력시 콤마
+            st.metric("최종 결제 금액", f"{best_result['최종액']:,}원")
+            st.caption(f"음식 {best_result['음식값']:,}원 + 배달비 {best_result['배달비']:,}원 - 쿠폰 {coupon:,}원")
 
         st.balloons()
     else:
