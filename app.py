@@ -41,12 +41,12 @@ with st.sidebar:
     selected_store = st.selectbox("🏬 가게 선택", list(store_menu_data.keys()))
     current_menus = store_menu_data[selected_store]
     
-    # 수정된 입력 부분: step=1000으로 증감 조절, format="%d"로 콤마 가독성 확보
+    # tep=1000으로 증감 조절, format="%d"로 콤마 가독성 확보
     budget = st.number_input("나의 총 예산 (원)", min_value=0, value=30000, step=1000, format="%d")
     min_order = st.number_input("가게 최소주문금액 (원)", min_value=0, value=16000, step=1000, format="%d")
+    main_item = st.selectbox("꼭 먹고 싶은 메뉴", list(current_menus.keys()))
     coupon = st.number_input("쿠폰 할인액 (원)", min_value=0, value=0, step=1000, format="%d")
     
-    main_item = st.selectbox("꼭 먹고 싶은 메뉴", list(current_menus.keys()))
 
 # 실행 버튼
 if st.button("🚀 최적의 조합 계산하기"):
