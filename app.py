@@ -11,8 +11,7 @@ store_menu_data = {
     "청년피자": {"에그콘피자(L)": 24900, "매드쉬림프(L)": 24900, "진짜감자피자(L)": 18900, "할라불고기(L)": 18900, "알리오올리오파스타": 7900},
     "메가커피": {"아이스아메리카노": 2000, "딸기라떼": 3700, "큐브라떼": 4200, "허니자몽블랙티": 3700, "감자빵": 3500},
     "설빙": {"인절미설빙": 9500, "애플망고치즈설빙": 13900, "초코브라우니설빙": 12900, "생딸기설빙": 15500, "인절미토스트": 4800},
-    "미쉐": {"소프트아이스크림": 1000, "레몬에이드": 1500, "망고선데이": 2500, "브라운슈가펄밀크티": 3500, "복숭아얼그레이": 2500}
-}
+    "미쉐": {"소프트아이스크림": 1000, "레몬에이드": 1500, "망고선데이": 2500, "브라운슈가펄밀크티": 3500, "복숭아얼그레이": 2500}}
 
 # 배달비 산정 기준
 delivery_rules = [(50000, 0), (35000, 1000), (18000, 3000), (0, 4000)]
@@ -28,18 +27,6 @@ def calculate_total_cost(menu_dict, combo_list, coupon_amount):
     total_cost = food_price + delivery_fee - coupon_amount
     return total_cost, food_price, delivery_fee
 
-# 숫자 입력창에 콤마 자동 적용 함수
-def comma_input(label, default="0"):
-    raw = st.text_input(label, f"{int(default):,}")
-    try:
-        # 콤마 제거 후 숫자로 변환
-        value = int(raw.replace(",", ""))
-        # 다시 콤마 붙여서 표시
-        st.session_state[label] = f"{value:,}"
-        return value
-    except:
-        return 0
-
 # 2. 웹 UI 구성
 st.set_page_config(page_title="배달비의 민족", layout="wide")
 st.title("🛵 배달비 최소화 주문 조합 추천 시스템")
@@ -52,14 +39,12 @@ with st.sidebar:
     st.header("⚙️ 주문 설정")
     selected_store = st.selectbox("🏬 가게 선택", list(store_menu_data.keys()))
     current_menus = store_menu_data[selected_store]
-   
-    st.write(f"예산: {budget:,} 원")
+    
+    # step=1000 유지
+    budget = st.number_input("나의 총 예산 (원)", value=30000, step=1000)
     min_order = st.number_input("가게 최소주문금액 (원)", value=16000, step=1000)
-    st.write(f"최소주문금액: {min_order:,} 원")
-    main_item = st.selectbox("꼭 먹고 싶은 메뉴", list(current_menus.keys()))
     coupon = st.number_input("쿠폰 할인액 (원)", value=0, step=1000)
-    st.write(f"쿠폰: {coupon:,} 원")
-
+    main_item = st.selectbox("꼭 먹고 싶은 메뉴", list(current_menus.keys()))
 
 # 버튼만 바로 실행
 if st.button("🚀 최적의 조합 계산하기"):
@@ -92,10 +77,10 @@ if st.button("🚀 최적의 조합 계산하기"):
         with res_col1:
             st.write("**[추천 메뉴 구성]**")
             for m in best_result['조합']:
-                st.write(f"- {m} ({current_menus[m]:,}원)")
+                st.write(f"- {m} ({current_menus[m]:,}원)")  # 출력시 콤마
         with res_col2:
-            st.metric("최종 결제 금액", f"{best_result['최종액']:,}원")
-            st.caption(f"음식 {best_result['음식값']:,}원 + 배달비 {best_result['배달비']:,}원 - 쿠폰 {coupon:,}원")
+            st.metric("최종 결제 금액", f"{best_result['최종액']:,}원")  # 출력시 콤마
+            st.caption(f"음식 {best_result['음식값']:,}원 + 배달비 {best_result['배달비']:,}원 - 쿠폰 {coupon:,}원")  # 출력시 콤마
 
         st.balloons()
     else:
