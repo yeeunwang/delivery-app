@@ -64,7 +64,10 @@ def calculate_total_cost(menu_dict, combo_list, coupon_amount):
 # 2. 웹 UI 구성
 st.set_page_config(page_title="배달비의 민족", layout="wide")
 st.title("🛵 배달비 최소화 주문 조합 추천 시스템")
-st.caption("성균관대학교 문제해결과컴퓨팅사고 - 러닝페어 2팀 (김나은, 여샘물, 왕예은, 정보미)")
+st.markdown(
+    "<span style='color:gray'>성균관대학교 문제해결과컴퓨팅사고 - 러닝페어 2팀 (김나은, 여샘물, 왕예은, 정보미)</span>",
+    unsafe_allow_html=True
+)
 
 with st.sidebar:
     st.header("⚙️ 주문 설정")
