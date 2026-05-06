@@ -9,7 +9,7 @@ store_menu_data = {
     '신전떡볶이': {'신전떡볶이': 4000, '로제떡볶이': 6000, '치즈떡볶이': 6000, '마라로제떡볶이': 7000, 
               '신전김밥': 3000, '신전치즈김밥': 4000, '참치마요컵밥': 4000, '스팸마요컵밥': 4000, '치킨마요컵밥': 4500,
               '튀김오뎅(5개)': 1700, '잡채말이(3개)': 1700, '납작만두(5개)': 2000, '통살오징어(3개)': 2900, '순대': 4000,
-              '쥬시쿨':2000, '콜라': 2000, '사이다': 2000, '삶은계란(2ea)': 1500}
+              '쥬시쿨':2000, '콜라': 2000, '사이다': 2000, '삶은계란(2ea)': 1500},
     '써브웨이': {'이탈리안BMT': 7400, '에그마요': 6200, '스테이크앤치즈': 8400, '로스트치킨': 7300, '쿠키팩(6개)': 9100},
     '맘스터치': {'화이트갈릭버거 단품': 6300, '딥치즈버거 단품': 6200, '휠렛버거 단품': 5800,
         '불고기버거 단품': 5000, '통새우버거 단품': 4900, '쉬림프싸이플렉스버거 단품': 9000,
@@ -54,7 +54,7 @@ with st.sidebar:
     # tep=1000으로 증감 조절, format='%d'로 콤마 가독성 확보
     budget = st.number_input('나의 총 예산 (원)', min_value=0, value=30000, step=1000, format='%d')
     min_order = st.number_input('가게 최소주문금액 (원)', min_value=0, value=16000, step=1000, format='%d')
-    main_item = st.selectbox('꼭 먹고 싶은 메뉴', list(current_menus.keys()))
+    main_item = st.multiselect('꼭 먹고 싶은 메뉴', list(current_menus.keys()))
     coupon = st.number_input('쿠폰 할인액 (원)', min_value=0, value=0, step=1000, format='%d')
     
 # 실행 버튼
@@ -65,7 +65,7 @@ if st.button('🚀 최적의 조합 계산하기'):
     # 메뉴 조합 탐색 (1개~4개 조합)
     for i in range(1, 5): 
         for combo in itertools.combinations(items, i):
-            if main_item not in combo: 
+            if not set(main_items).issubset(combo):
                 continue
             total, food, d_fee = calculate_total_cost(current_menus, combo, coupon)
             # 조건 확인: 최소주문금액 이상이고 총 결제액이 예산 이내인 경우
