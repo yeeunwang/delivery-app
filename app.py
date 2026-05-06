@@ -23,7 +23,8 @@ store_menu_data = {
     '메가커피': {'아이스아메리카노': 2000, '딸기라떼': 3700, '큐브라떼': 4200, '허니자몽블랙티': 3700, '감자빵': 3500},
     '설빙': {'인절미설빙': 9500, '애플망고치즈설빙': 13900, '초코브라우니설빙': 12900, '생딸기설빙': 15500, '인절미토스트': 4800},
     '미쉐': {'소프트아이스크림': 1000, '레몬에이드': 1500, '망고선데이': 2500, '브라운슈가펄밀크티': 3500, '복숭아얼그레이': 2500}
-}# 배달비 산정 기준
+}
+# 배달비 산정 기준
 delivery_rules = [(50000, 0), (35000, 1000), (18000, 3000), (0, 4000)]
 # [핵심 함수] 최소 비용 연산 로직
 def calculate_total_cost(menu_dict, combo_list, coupon_amount):
@@ -41,7 +42,8 @@ st.title('🛵 배달비 최소화 주문 조합 추천 시스템')
 st.markdown(
     "<span style='color:gray'>성균관대학교 문제해결과컴퓨팅사고 - 러닝페어 2팀 (김나은, 여샘물, 왕예은, 정보미)</span>",
     unsafe_allow_html=True
-)with st.sidebar:
+)
+with st.sidebar:
     st.header('⚙ 주문 설정')
     selected_store = st.selectbox('🏬 가게 선택', list(store_menu_data.keys()))
     current_menus = store_menu_data[selected_store]
