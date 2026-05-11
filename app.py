@@ -46,9 +46,11 @@ store_menu_data = {
         '라이트블랙밀크티': 4500, '레몬아이스티': 4200, '아메리카노': 2700, '카페라떼': 3500, '아이스크림 라떼': 4000, '딸기아이스크림쉐이크': 4200, '망고아이스크림쉐이크': 4200, 
         '딸기선데이아이스크림': 4200, '망고선데이아이스크림': 4200, '바삭쿠키아이스크림선데이': 4200, '흑당버블아이스크림선데이': 4200, '바삭쿠키타로선데이': 4500, '복숭아선데이': 4200}
 }
+# 2. 배달비 산정 기준 (규칙 유지)
+delivery_rules = [(50000, 0), (35000, 1000), (18000, 3000), (0, 4000)]
 
 # [핵심 함수] 최소 비용 연산 로직
-def calculate_total_cost(menu_dict, combo_list, coupon_amount, base_delivery_fee, use_distance_fee, distance_km):
+def calculate_total_cost(menu_dict, combo_list, coupon_amount, base_delivery_fee, use_distance_fee, distance_km, delivery_rules):
     food_price = sum(menu_dict[item] for item in combo_list)
     
     # 기본 배달비 규칙 적용
@@ -67,7 +69,7 @@ def calculate_total_cost(menu_dict, combo_list, coupon_amount, base_delivery_fee
     total_cost = food_price + delivery_fee + distance_fee - coupon_amount
     return total_cost, food_price, delivery_fee, distance_fee
 
-# 2. 웹 UI 구성
+# 3. 웹 UI 구성
 st.set_page_config(page_title='배달비의 민족', layout='wide')
 st.title('🛵 배달비 최소화 주문 조합 추천 시스템')
 
@@ -99,7 +101,7 @@ if st.button('🚀 최적의 조합 계산하기'):
             if not set(main_items).issubset(combo):
                 continue
             total, food, d_fee, dist_fee = calculate_total_cost(
-                current_menus, combo, coupon, base_delivery_fee, use_distance_fee, distance_km
+                current_menus, combo, coupon, base_delivery_fee, use_distance_fee, distance_km, delivery_rules
             )
             if food >= min_order and total <= budget:
                 if total < best_cost:
@@ -128,5 +130,4 @@ if st.button('🚀 최적의 조합 계산하기'):
             )
         st.balloons()
     else:
-        st.error('조건에 맞는 조합이 없습니다. 예산을 늘리거나 다른 메뉴를 선택해 보세요.')
-
+        st.error('조건에 맞는 조합이 없습니다. 예산을 늘리거나 다른 메뉴를 선택해 보세요.'
