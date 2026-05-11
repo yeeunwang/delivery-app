@@ -53,17 +53,20 @@ delivery_rules = [(50000, 0), (35000, 1000), (18000, 3000), (0, 4000)]
 def calculate_total_cost(menu_dict, combo_list, coupon_amount, base_delivery_fee, use_distance_fee, distance_km, delivery_rules):
     food_price = sum(menu_dict[item] for item in combo_list)
     
-    # 기본 배달비 규칙 적용
-    delivery_fee = base_delivery_fee
-    for limit, fee in delivery_rules:
-        if food_price >= limit:
-            delivery_fee = fee
-            break
+    # 규칙 대신 사용자가 입력한 기본 배달비를 우선 적용
+    if base_delivery_fee is not None:  
+        delivery_fee = base_delivery_fee
+    else:
+        # 사용자가 입력하지 않은 경우에만 규칙 적용
+        delivery_fee = 4000
+        for limit, fee in delivery_rules:
+            if food_price >= limit:
+                delivery_fee = fee
+                break
     
     # 거리별 추가 배달비
     distance_fee = 0
     if use_distance_fee:
-        # 100m당 100원 → 1km당 1000원
         distance_fee = int(distance_km * 1000 / 100 * 100)
     
     total_cost = food_price + delivery_fee + distance_fee - coupon_amount
