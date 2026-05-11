@@ -48,46 +48,61 @@ store_menu_data = {
 }
 # 배달비 산정 기준
 delivery_rules = [(50000, 0), (35000, 1000), (18000, 3000), (0, 4000)]
+
 # [핵심 함수] 최소 비용 연산 로직
-def calculate_total_cost(menu_dict, combo_list, coupon_amount):
+def calculate_total_cost(menu_dict, combo_list, coupon_amount, base_delivery_fee, use_distance_fee, distance_km):
     food_price = sum(menu_dict[item] for item in combo_list)
-    delivery_fee = 4000
+    
+    # 기본 배달비 규칙 적용
+    delivery_fee = base_delivery_fee
     for limit, fee in delivery_rules:
         if food_price >= limit:
             delivery_fee = fee
             break
-    total_cost = food_price + delivery_fee - coupon_amount
-    return total_cost, food_price, delivery_fee
+    
+    # 거리별 추가 배달비
+    distance_fee = 0
+    if use_distance_fee:
+        # 100m당 100원 → 1km당 1000원
+        distance_fee = int(distance_km * 1000 / 100 * 100)
+    
+    total_cost = food_price + delivery_fee + distance_fee - coupon_amount
+    return total_cost, food_price, delivery_fee, distance_fee
+
 # 2. 웹 UI 구성
 st.set_page_config(page_title='배달비의 민족', layout='wide')
 st.title('🛵 배달비 최소화 주문 조합 추천 시스템')
-st.markdown(
-    "<span style='color:gray'>성균관대학교 문제해결과컴퓨팅사고 - 러닝페어 2팀 (김나은, 여샘물, 왕예은, 정보미)</span>",
-    unsafe_allow_html=True
-)
+
 with st.sidebar:
     st.header('⚙ 주문 설정')
     selected_store = st.selectbox('🏬 가게 선택', list(store_menu_data.keys()))
     current_menus = store_menu_data[selected_store]
     
-    # tep=1000으로 증감 조절, format='%d'로 콤마 가독성 확보
     budget = st.number_input('나의 총 예산 (원)', min_value=0, value=30000, step=1000, format='%d')
     min_order = st.number_input('가게 최소주문금액 (원)', min_value=0, value=16000, step=1000, format='%d')
     main_items = st.multiselect('꼭 먹고 싶은 메뉴', list(current_menus.keys()))
     coupon = st.number_input('쿠폰 할인액 (원)', min_value=0, value=0, step=1000, format='%d')
     
+    # 새로 추가된 부분
+    base_delivery_fee = st.number_input('기본 배달비 (원)', min_value=0, value=4000, step=500, format='%d')
+    use_distance_fee = st.checkbox('거리별 배송비 적용하기')
+    distance_km = 0
+    if use_distance_fee:
+        distance_km = st.number_input('배달 거리 (km)', min_value=0.0, value=1.0, step=0.1, format='%0.1f')
+
 # 실행 버튼
 if st.button('🚀 최적의 조합 계산하기'):
     items = list(current_menus.keys())
     best_cost = float('inf')
     best_result = None
-    # 메뉴 조합 탐색 (1개~4개 조합)
+    
     for i in range(1, 5): 
         for combo in itertools.combinations(items, i):
             if not set(main_items).issubset(combo):
                 continue
-            total, food, d_fee = calculate_total_cost(current_menus, combo, coupon)
-            # 조건 확인: 최소주문금액 이상이고 총 결제액이 예산 이내인 경우
+            total, food, d_fee, dist_fee = calculate_total_cost(
+                current_menus, combo, coupon, base_delivery_fee, use_distance_fee, distance_km
+            )
             if food >= min_order and total <= budget:
                 if total < best_cost:
                     best_cost = total
@@ -95,6 +110,7 @@ if st.button('🚀 최적의 조합 계산하기'):
                         '조합': combo,
                         '음식값': food,
                         '배달비': d_fee,
+                        '거리비': dist_fee,
                         '최종액': int(total)
                     }
     if best_result:
@@ -106,8 +122,13 @@ if st.button('🚀 최적의 조합 계산하기'):
             for m in best_result['조합']:
                 st.write(f'- {m} ({current_menus[m]:,}원)')
         with res_col2:
-            st.metric('최종 결제 금액', f'{best_result['최종액']:,}원')
-            st.caption(f'음식 {best_result['음식값']:,}원 + 배달비 {best_result['배달비']:,}원 - 쿠폰 {coupon:,}원')
+            st.metric('최종 결제 금액', f'{best_result["최종액"]:,}원')
+            st.caption(
+                f'음식 {best_result["음식값"]:,}원 + 배달비 {best_result["배달비"]:,}원'
+                + (f' + 거리비 {best_result["거리비"]:,}원' if use_distance_fee else '')
+                + f' - 쿠폰 {coupon:,}원'
+            )
         st.balloons()
     else:
         st.error('조건에 맞는 조합이 없습니다. 예산을 늘리거나 다른 메뉴를 선택해 보세요.')
+
