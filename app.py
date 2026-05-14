@@ -195,6 +195,7 @@ store_db = {
             'min_order': 15000,
             'delivery_logic': lambda p: 0, 
             'notice': '💡 15,000원 이상 무료배달'},
+     }
     }
 }
 # [핵심] 최적 조합 계산 함수
