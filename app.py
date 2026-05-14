@@ -175,7 +175,7 @@ store_db = {
             'delivery_logic': lambda p: 0, 
             'notice': '💡 15,000원 이상 무료배달'},
     }
-
+}
 # [핵심] 최적 조합 계산 함수
 def find_best_combo(menu_dict, delivery_logic, must_have, budget, min_order):
     all_menus = list(menu_dict.keys())
