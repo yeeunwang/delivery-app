@@ -1,136 +1,144 @@
 import streamlit as st
 import itertools
-# 1. 가게별 메뉴 데이터 구축
-store_menu_data = {
-    '한솥도시락': {'치킨마요': 4700, '빅치킨마요': 5400, '돈까스도련님': 6000, '메가치킨마요': 7400, '진달래도시락': 9600, 
-              '오향 청양 소보로덮밥': 6300, '스팸마요': 5200, '송정식 떡갈비 도시락': 8000, '김치제육덮밥': 6000, '오리지널 치즈닭갈비 덮밥': 7300,
-              '돈까스 덮밥': 5500, '김치볶음밥': 5200, '부대찌개(밥포함)': 7300, '묵은지김치찌개(밥포함)': 6800, '단품 카레': 3700, '꿀 치즈스틱': 2800,
-              '볶음김치': 2800, '무말랭이': 3300, '한솥밥': 1500, '미니사이다': 1500, '미니생수': 500},
-    '신전떡볶이': {'신전떡볶이': 4000, '로제떡볶이': 6000, '치즈떡볶이': 6000, '마라로제떡볶이': 7000, 
-              '신전김밥': 3000, '신전치즈김밥': 4000, '참치마요컵밥': 4000, '스팸마요컵밥': 4000, '치킨마요컵밥': 4500,
-              '튀김오뎅(5개)': 1700, '잡채말이(3개)': 1700, '납작만두(5개)': 2000, '통살오징어(3개)': 2900, '순대': 4000,
-              '쥬시쿨':2000, '콜라': 2000, '사이다': 2000, '삶은계란(2ea)': 1500},
-    '써브웨이': {'베지': 6000, '에그슬라이스': 6300, '참치': 7100, '머쉬룸': 7300, '치킨슬라이스': 7500, '비엘티': 8000, 
-              '스파이시이탈리안': 8100, '치킨데리야끼': 8300, '써브웨이 클럽': 8400, '이탈리안BMT': 8500, '에그마요': 6800,
-              '풀드포크 바비큐': 8500, '쉬림프': 8800, '치킨베이컨아보카도': 9400, '스테이크&치즈': 9400, '안창 비프': 11700, 
-              '피자썹': 5200, '잠봉': 8300, '로스트치킨': 8700, '오늘의 수프(하프)': 3200, '쿠키(3개입)': 5500, '쿠키팩(6개)': 10800, '칩(랜덤발송)': 1900,
-              '바리스타룰스 아메리카노(350ml)': 3300, '코카콜라 제로(355ml)': 2900, '스프라이트(355ml)': 2900, '닥터페퍼(355ml)': 2900},
-    '맘스터치': {'화이트갈릭버거 단품': 6300, '딥치즈버거 단품': 6200, '휠렛버거 단품': 5800,
-        '불고기버거 단품': 5000, '통새우버거 단품': 4900, '쉬림프싸이플렉스버거 단품': 9000,
-        '싸이버거 단품': 6000, '불싸이버거 단품': 6200, '핫치즈 빅싸이순살': 17000,
-        '후라이드 빅싸이순살': 14400, '맘스양념 빅싸이순살': 16400, '간장마늘 빅싸이순살': 16400,
-        '골든갈릭 빅싸이순살': 17000, '케이준떡강정S': 5400, '케이준떡강정R': 14000,
-        '간장마늘떡강정S': 5600, '간장마늘떡강정R': 14500, '치파오떡강정S': 5600,
-        '케이준떡강정R': 14500, '콘샐러드': 2700, '코울슬로': 2700,
-        '바삭크림치즈볼(2조각)': 2900, '치즈스틱(2조각)': 2900, '펩시콜라': 2400,
-        '펩시콜라제로': 2400, '사이다': 2400, '청포도에이드': 3100,
-        '레몬에이드': 3100, '오렌지주스': 2900, '아이스아메리카노': 2900},
-    '두찜': {'두찜 까만찜닭': 27800, '마라로제찜닭': 26800, '불닭로제찜닭': 26800, '두찜 실비한우곱찜닭': 34800,
-        '타코라구요 찜닭(나쵸칩 포함)': 28800, '로제닭발(무뼈)': 27800, '한우대창맵닭발(무뼈)': 28800, '로제찜닭': 30800,
-        '시래기찜닭': 30800, '스팸부대찜닭': 30800, '묵은지김치볶음밥': 4900, '곤드레까만볶음밥': 4900, '꿔바로우 3개': 4500,
-        '눈꽃감자 1봉': 1000, '가지튀김 15개': 3000, '통새우튀김 2개': 4000, '서울식 납작만두(5개)': 2000, '공기밥': 1500,
-        '코카콜라 추가 500ml': 2500, '스프라이트 추가 500ml': 2500, '생수 500ml': 1000},
-    '청년피자': {'리얼치즈': 19900, '하와이안': 19900, '야채피자': 19900, '진짜감자피자': 20900, '슈퍼슈프림': 20900, '리얼페페로니': 20900,
-        '바질 콰트로치즈 피자': 20900, '빅파 불고기 피자': 21900, '구황작물 에디션': 21900, '구름에그콘피자': 21900, '멜팅 고구마 피자': 21900,
-        '김춘자 마늘갈비': 21900, '베를린메가미트': 21900, '할라불고기': 21900, '진짜게살피자': 21900, '트리플 머쉬룸 크림 뇨끼': 6900, '페퍼로니 치즈 김치볶음밥': 5900,
-        '미트소스스파게티': 6500, '알리오올리오파스타': 6500, '로제베이컨스파게티': 6500, '로제쉬림프파스타': 7500, '베이컨까르보나라': 7500, '해피 치즈스틱(4개)': 5500,
-        '고구마크림치즈스틱': 13900, '오븐베이크치킨': 13900, '청양마요소스': 800, '갈릭딥핑소스': 800, '할라피뇨': 500, '피클': 500, '코카콜라 500ML': 1700, '스프라이트 500ML': 1700},
-    '설빙': {'인절미설빙': 11400, '애플망고치즈설빙': 16000, '생딸기설빙': 15400, '순수요거생딸기설빙': 17400, '딥초코브라우니설빙': 15400, '오레오초코몬스터설빙': 15000,
-        '치즈설빙': 14400, '순수요거블루베리설빙': 16000, '두바이초코설빙': 19000, '깨먹는THE돼지바설빙': 16400, '생딸기찐한말차볼설빙': 17900, 
-        '허니버터브레드': 5800, '인절미토스트': 4800, '한입쏙붕어빵': 2900, '생딸기찹쌀떡':2200, '치즈크로플': 3900, '플레인크로플': 3500, '인절미크로플': 3900,
-        '쌍쌍치즈가래떡': 4300, '딥초코츄러스': 2900, '꿀호떡': 2200, '매콤떡볶이': 4900, '두바이찹쌀떡': 5300, '두바이크로플': 9300, '연유라떼': 4900, '아메리카노': 3900, '카페라떼': 4500,
-        '핫초코': 3500, '딸기라떼': 4800, '유자에이드': 4500, '딸기에이드': 4500, '생생레몬에이드': 4500, '애플망고에이드': 4800, '허니자몽에이드': 4800},
-    '미쉐': {'오리지널밀크티': 4500, '흑당밀크티': 4500, '블랙밀크티': 4500, '치즈폼밀크티(펄있음)': 5000, '코코넛밀크티': 4500, '타로펄밀크티': 4500, '타로라떼': 5000,
-        '삼형제밀크티': 5500, '라이트밀크우롱티': 4500, '바삭쿠키코코아밀크티': 4500, '흑당우유': 4500, '생레몬워터':2800, '양즈깐루': 5200, '딸기깐루': 5200, '딸기치즈폼우롱티': 5400,
-        '딸기뽀뽀': 4800, '오렌지우롱티': 4600, '오렌지망고우롱티': 5000, '포도우롱티': 5000, '복숭아뽀뽀': 4800, '딸기복숭아우롱티': 5000, '딸기복숭아우유': 4500, 
-        '라이트블랙밀크티': 4500, '레몬아이스티': 4200, '아메리카노': 2700, '카페라떼': 3500, '아이스크림 라떼': 4000, '딸기아이스크림쉐이크': 4200, '망고아이스크림쉐이크': 4200, 
-        '딸기선데이아이스크림': 4200, '망고선데이아이스크림': 4200, '바삭쿠키아이스크림선데이': 4200, '흑당버블아이스크림선데이': 4200, '바삭쿠키타로선데이': 4500, '복숭아선데이': 4200}
+
+# 1. 가게별 데이터베이스 (문법 오류 수정 및 데이터 정제)
+store_db = {
+    '치킨': {
+        '교촌치킨': {
+            'menu': {'허니콤보': 23000, '간장콤보': 20000, '레드콤보': 20000, '웨지감자': 4000, '칩카사바': 2000, '코카콜라 1.25L': 3200},
+            'min_order': 17000,
+            'delivery_logic': lambda p: 0, 
+            'notice': '💡 17,000원 이상 주문 시 무료배달'
+        },
+        'BHC': {
+            'menu': {'뿌링클': 21000, '맛초킹': 21000, '콰삭킹': 20000, '달콤바삭치즈볼': 5000, '뿌링소떡': 3500, '코카콜라 1.25L': 2500},
+            'min_order': 20000,
+            'delivery_logic': lambda p: 0, 
+            'notice': '💡 20,000원 이상 주문 시 무료배달'
+        }
+    },
+    '피자': {
+        '도미노피자': {
+            'menu': {'블랙타이거 슈림프 L': 36900, '포테이토 L': 27900, '리얼불고기 L': 29900, '하트 포테이토': 5400, 'NEW 치즈 볼로네즈 스파게티': 9800, '코카콜라 1.25L': 2500},
+            'min_order': 16900,
+            'delivery_logic': lambda p: 0, 
+            'notice': '💡 16,900원 이상 무료배달'
+        },
+        '청년피자': {
+            'menu': {'리얼치즈 R': 16900, '하와이안 R': 17900, '슈퍼슈프림 R': 18900, '알리오올리오파스타': 6500, '페퍼로니 치즈 김치볶음밥': 5900, '코카콜라 1.25L': 2700},
+            'min_order': 18900,
+            'delivery_logic': lambda p: 0, 
+            'notice': '💡 18,900원 이상 무료배달'
+        },
+        '노모어피자': {
+            'menu': {'옥수수새우피자 R': 23800, '페퍼로니피자 R': 19800, '스윗고구마피자 R': 21800, '치즈오븐김치볶음밥': 8900, '옥수수바질치즈크림뇨끼': 8800, '코카콜라 1.25L': 2800},
+            'min_order': 18000,
+            'delivery_logic': lambda p: 0, 
+            'notice': '💡 18,000원 이상 무료배달'
+        }
+    },
+    '떡볶이': {
+        '신전떡볶이': {
+            'menu': {'신전떡볶이': 4000, '마라로제떡볶이': 7000, '모둠튀김': 4500, '신전치즈김밥': 4000, '스팸마요컵밥': 4000, '쥬시쿨': 2000},
+            'min_order': 14000,
+            'delivery_logic': lambda p: 0, 
+            'notice': '💡 14,000원 이상 무료배달'
+        },
+        '배떡 로제떡볶이': {
+            'menu': {'로제떡볶이': 11000, '새우크림 떡볶이': 13000, '국물 떡볶이': 6000, '튀김세트A': 7000, '오리지널 타코야키': 5000, '쿨피스 930ml': 2000},
+            'min_order': 14000,
+            'delivery_logic': lambda p: 0, 
+            'notice': '💡 14,000원 이상 무료배달'
+        },
+        '동대문엽기떡볶이': {
+            'menu': {'엽기메뉴': 14000, '마라떡볶이': 16000, '엽기닭볶음탕': 24000, '숯불무뼈닭발': 16000, '참치마요밥': 3500, '펩시 355ml': 2000},
+            'min_order': 14000,
+            'delivery_logic': lambda p: 0, 
+            'notice': '💡 14,000원 이상 무료배달'
+        }
+    }
 }
-# 2. 배달비 산정 기준 (규칙 유지)
-delivery_rules = [(50000, 0), (35000, 1000), (18000, 3000), (0, 4000)]
 
-# [핵심 함수] 최소 비용 연산 로직
-def calculate_total_cost(menu_dict, combo_list, coupon_amount, base_delivery_fee, use_distance_fee, distance_km, delivery_rules):
-    food_price = sum(menu_dict[item] for item in combo_list)
-    
-    # 규칙 대신 사용자가 입력한 기본 배달비를 우선 적용
-    if base_delivery_fee is not None:  
-        delivery_fee = base_delivery_fee
-    else:
-        # 사용자가 입력하지 않은 경우에만 규칙 적용
-        delivery_fee = 4000
-        for limit, fee in delivery_rules:
-            if food_price >= limit:
-                delivery_fee = fee
-                break
-    
-    # 거리별 추가 배달비
-    distance_fee = 0
-    if use_distance_fee:
-        distance_fee = int(distance_km * 1000 / 100 * 100)
-    
-    total_cost = food_price + delivery_fee + distance_fee - coupon_amount
-    return total_cost, food_price, delivery_fee, distance_fee
+# [핵심] 최적 조합 계산 함수
+def find_best_combo(menu_dict, delivery_logic, must_have, budget, min_order):
+    all_menus = list(menu_dict.keys())
+    best_res = None
+    min_total = float('inf')
 
-# 3. 웹 UI 구성
-st.set_page_config(page_title='배달비의 민족', layout='wide')
-st.title('🛵 배달비 최소화 주문 조합 추천 시스템')
-
-with st.sidebar:
-    st.header('⚙ 주문 설정')
-    selected_store = st.selectbox('🏬 가게 선택', list(store_menu_data.keys()))
-    current_menus = store_menu_data[selected_store]
-    
-    budget = st.number_input('나의 총 예산 (원)', min_value=0, value=30000, step=1000, format='%d')
-    min_order = st.number_input('가게 최소주문금액 (원)', min_value=0, value=16000, step=1000, format='%d')
-    main_items = st.multiselect('꼭 먹고 싶은 메뉴', list(current_menus.keys()))
-    coupon = st.number_input('쿠폰 할인액 (원)', min_value=0, value=0, step=1000, format='%d')
-    
-    # 새로 추가된 부분
-    base_delivery_fee = st.number_input('기본 배달비 (원)', min_value=0, value=4000, step=500, format='%d')
-    use_distance_fee = st.checkbox('거리별 배송비 적용하기')
-    distance_km = 0
-    if use_distance_fee:
-        distance_km = st.number_input('배달 거리 (km)', min_value=0.0, value=1.0, step=0.1, format='%0.1f')
-
-# 실행 버튼
-if st.button('🚀 최적의 조합 계산하기'):
-    items = list(current_menus.keys())
-    best_cost = float('inf')
-    best_result = None
-    
-    for i in range(1, 5): 
-        for combo in itertools.combinations(items, i):
-            if not set(main_items).issubset(combo):
+    # 조합 탐색 (1~5개 조합)
+    for i in range(1, 6):
+        for combo in itertools.combinations(all_menus, i):
+            if not set(must_have).issubset(combo):
                 continue
-            total, food, d_fee, dist_fee = calculate_total_cost(
-                current_menus, combo, coupon, base_delivery_fee, use_distance_fee, distance_km, delivery_rules
-            )
-            if food >= min_order and total <= budget:
-                if total < best_cost:
-                    best_cost = total
-                    best_result = {
-                        '조합': combo,
-                        '음식값': food,
-                        '배달비': d_fee,
-                        '거리비': dist_fee,
-                        '최종액': int(total)
-                    }
-    if best_result:
-        st.markdown('---')
-        st.success(f'🎯 [{selected_store}] 최적의 조합을 발견했습니다!')
+            
+            food_total = sum(menu_dict[m] for m in combo)
+            
+            if food_total < min_order:
+                continue
+                
+            current_delivery_fee = delivery_logic(food_total)
+            final_price = food_total + current_delivery_fee
+            
+            if final_price <= budget and final_price < min_total:
+                min_total = final_price
+                best_res = {
+                    'items': combo,
+                    'food_price': food_total,
+                    'delivery_fee': current_delivery_fee,
+                    'total': final_price
+                }
+    return best_res
+
+# --- Streamlit UI 시작 ---
+st.set_page_config(page_title="배달비 최적화 시스템", layout="wide")
+st.title("🛵 배달비 최적화 주문 시스템")
+st.markdown("가게별로 다른 **배달비 규칙**을 분석하여 예산 안에서 가장 저렴한 조합을 찾아드립니다.")
+
+category = st.selectbox("1️⃣ 어떤 종류의 음식을 드실 건가요?", list(store_db.keys()))
+brand = st.selectbox(f"2️⃣ {category} 브랜드 중 하나를 골라주세요.", list(store_db[category].keys()))
+target_store = store_db[category][brand]
+
+st.divider()
+
+col1, col2 = st.columns([1, 1])
+
+with col1:
+    st.subheader("💰 예산 및 필수 메뉴")
+    user_budget = st.number_input("나의 총 예산 (원)", min_value=0, value=30000, step=1000)
+    st.info(f"📍 {brand} 최소 주문금액: {target_store['min_order']:,}원")
+    must_items = st.multiselect("꼭 먹고 싶은 메뉴를 선택하세요 (필수)", list(target_store['menu'].keys()))
+
+with col2:
+    st.subheader("📌 배달비 정책 정보")
+    st.warning(target_store['notice'])
+    with st.expander("전체 메뉴 가격 보기"):
+        for m, p in target_store['menu'].items():
+            st.write(f"- {m}: {p:,}원")
+
+if st.button("🚀 최적의 조합 계산하기"):
+    with st.spinner('계산 중...'):
+        result = find_best_combo(
+            target_store['menu'], 
+            target_store['delivery_logic'], 
+            must_items, 
+            user_budget, 
+            target_store['min_order']
+        )
+    
+    if result:
+        st.balloons()
+        st.success(f"🎯 [{brand}] 추천 조합을 찾았습니다!")
         res_col1, res_col2 = st.columns(2)
         with res_col1:
-            st.write('**[추천 메뉴 구성]**')
-            for m in best_result['조합']:
-                st.write(f'- {m} ({current_menus[m]:,}원)')
+            st.write("### 🍱 추천 메뉴 구성")
+            for item in result['items']:
+                price = target_store['menu'][item]
+                st.write(f"- **{item}**: {price:,}원")
         with res_col2:
-            st.metric('최종 결제 금액', f'{best_result["최종액"]:,}원')
-            st.caption(
-                f'음식 {best_result["음식값"]:,}원 + 배달비 {best_result["배달비"]:,}원'
-                + (f' + 거리비 {best_result["거리비"]:,}원' if use_distance_fee else '')
-                + f' - 쿠폰 {coupon:,}원'
-            )
-        st.balloons()
+            st.write("### 💸 결제 상세")
+            st.metric("최종 결제 금액", f"{int(result['total']):,}원")
+            st.write(f"음식 합계: {int(result['food_price']):,}원")
+            st.write(f"배달비: {int(result['delivery_fee']):,}원")
+            st.caption(f"안내: {target_store['notice']}")
     else:
-        st.error('조건에 맞는 조합이 없습니다. 예산을 늘리거나 다른 메뉴를 선택하세요.')
+        st.error("조건을 만족하는 조합이 없습니다. 예산을 높이거나 메뉴를 조정해 주세요.")
