@@ -89,7 +89,8 @@ store_db = {
             'min_order': 16900,
             'delivery_logic': lambda p: 0, 
             'notice': '💡 16,900원 이상 무료배달'
-    },
+        },
+    }
     '떡볶이': {
         '신전떡볶이': {
             'menu': {'신전떡볶이': 4000, '로제떡볶이': 6000, '치즈떡볶이': 6000, '마라로제떡볶이': 7000, 
@@ -195,7 +196,7 @@ store_db = {
             'min_order': 15000,
             'delivery_logic': lambda p: 0, 
             'notice': '💡 15,000원 이상 무료배달'},
-    }
+        }
 }
 # [핵심] 최적 조합 계산 함수
 def find_best_combo(menu_dict, delivery_logic, must_have, budget, min_order):
